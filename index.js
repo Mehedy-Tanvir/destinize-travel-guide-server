@@ -29,6 +29,16 @@ const main = async () => {
       console.log(error);
     }
   });
+  app.get("/users", async (req, res) => {
+    try {
+      const myEmail = req.query.email;
+      const query = { email: myEmail };
+      const result = await User.findOne(query);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   app.get("/", async (req, res) => {
     res.send("Welcome to Destinize server");
