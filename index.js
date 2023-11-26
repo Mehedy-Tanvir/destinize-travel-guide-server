@@ -41,6 +41,18 @@ const main = async () => {
       console.log(error);
     }
   });
+  //   tour guide route
+  app.put("/users/:id", async (req, res) => {
+    try {
+      const user = req.body;
+      const id = req.params.id;
+
+      const result = await User.findByIdAndUpdate(id, user, { new: true });
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
   //   admin route
   app.get("/allUsers", async (req, res) => {
     try {
