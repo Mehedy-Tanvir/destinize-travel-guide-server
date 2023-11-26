@@ -31,9 +31,17 @@ const main = async () => {
   });
   app.get("/users", async (req, res) => {
     try {
-      const myEmail = req.query.email;
+      const myEmail = req?.query?.email;
       const query = { email: myEmail };
       const result = await User.findOne(query);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  app.get("/allUsers", async (req, res) => {
+    try {
+      const result = await User.find();
       res.send(result);
     } catch (error) {
       console.log(error);
