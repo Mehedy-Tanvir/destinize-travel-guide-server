@@ -5,6 +5,7 @@ require("dotenv").config();
 const port = process.env.PORT || 3000;
 const connectDB = require("./db/connectDB");
 const User = require("./models/User");
+const Tour = require("./models/Tour");
 
 // middlewares
 app.use(express.json());
@@ -55,6 +56,17 @@ const main = async () => {
       const { role } = req.body;
 
       const result = await User.findByIdAndUpdate(id, { role }, { new: true });
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  // tour package related api
+  app.post("/tours", async (req, res) => {
+    try {
+      const tour = req.body;
+      const result = await Tour.create(tour);
       res.send(result);
     } catch (error) {
       console.log(error);
