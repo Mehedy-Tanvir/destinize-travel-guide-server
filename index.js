@@ -6,6 +6,7 @@ const port = process.env.PORT || 3000;
 const connectDB = require("./db/connectDB");
 const User = require("./models/User");
 const Tour = require("./models/Tour");
+const Story = require("./models/Story");
 
 // middlewares
 app.use(express.json());
@@ -63,10 +64,22 @@ const main = async () => {
   });
 
   // tour package related api
+  // admin route
   app.post("/tours", async (req, res) => {
     try {
       const tour = req.body;
       const result = await Tour.create(tour);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  //story related api
+  app.post("/stories", async (req, res) => {
+    try {
+      const story = req.body;
+      const result = await Story.create(story);
       res.send(result);
     } catch (error) {
       console.log(error);
