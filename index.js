@@ -39,9 +39,22 @@ const main = async () => {
       console.log(error);
     }
   });
+  //   admin route
   app.get("/allUsers", async (req, res) => {
     try {
       const result = await User.find();
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   admin route
+  app.patch("/roles/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { role } = req.body;
+
+      const result = await User.findByIdAndUpdate(id, { role }, { new: true });
       res.send(result);
     } catch (error) {
       console.log(error);
