@@ -131,6 +131,19 @@ const main = async () => {
     }
   });
 
+  app.get("/reviews/:tourGuideId", async (req, res) => {
+    try {
+      const tourGuideId = req.params.tourGuideId;
+      const result = await Review.find({ tourGuideId: tourGuideId }).populate(
+        "reviewerId",
+        "name image"
+      );
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
   app.get("/", async (req, res) => {
     res.send("Welcome to Destinize server");
   });
