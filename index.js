@@ -7,6 +7,7 @@ const connectDB = require("./db/connectDB");
 const User = require("./models/User");
 const Tour = require("./models/Tour");
 const Story = require("./models/Story");
+const Review = require("./models/Review");
 
 // middlewares
 app.use(express.json());
@@ -113,6 +114,17 @@ const main = async () => {
     try {
       const story = req.body;
       const result = await Story.create(story);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //review related api
+  // tourist route
+  app.post("/reviews", async (req, res) => {
+    try {
+      const review = req.body;
+      const result = await Review.create(review);
       res.send(result);
     } catch (error) {
       console.log(error);
