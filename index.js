@@ -53,6 +53,17 @@ const main = async () => {
       console.log(error);
     }
   });
+  // all user route
+  app.get("/tourGuides", async (req, res) => {
+    try {
+      const query = { role: "Tour Guide" };
+      const result = await User.find(query);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
   //   admin route
   app.get("/allUsers", async (req, res) => {
     try {
