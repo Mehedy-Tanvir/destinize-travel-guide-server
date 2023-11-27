@@ -63,6 +63,16 @@ const main = async () => {
       console.log(error);
     }
   });
+  //   all user route
+  app.get("/tourGuides/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const result = await User.findById(id);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   //   admin route
   app.get("/allUsers", async (req, res) => {
