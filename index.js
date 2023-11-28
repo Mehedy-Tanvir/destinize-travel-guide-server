@@ -210,6 +210,21 @@ const main = async () => {
       console.log(error);
     }
   });
+  //   tour guide route
+  app.patch("/updateTourStatus/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { status } = req.body;
+      const result = await Booking.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+      );
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
   //   tourist route
   app.post("/wishlistItems", async (req, res) => {
     try {
