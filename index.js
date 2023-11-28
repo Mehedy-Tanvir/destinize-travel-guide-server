@@ -108,6 +108,25 @@ const main = async () => {
       console.log(error);
     }
   });
+  //   normal route
+  app.get("/tours", async (req, res) => {
+    try {
+      const result = await Tour.find();
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   normal route
+  app.get("/tours/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const result = await Tour.findById(id);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   //story related api
   app.post("/stories", async (req, res) => {
@@ -119,6 +138,7 @@ const main = async () => {
       console.log(error);
     }
   });
+
   //review related api
   // tourist route
   app.post("/reviews", async (req, res) => {
@@ -130,7 +150,7 @@ const main = async () => {
       console.log(error);
     }
   });
-
+  // normal route
   app.get("/reviews/:tourGuideId", async (req, res) => {
     try {
       const tourGuideId = req.params.tourGuideId;
