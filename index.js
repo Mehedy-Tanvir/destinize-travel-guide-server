@@ -201,8 +201,21 @@ const main = async () => {
   app.post("/bookings", async (req, res) => {
     try {
       const booking = req.body;
+      const touristId = req.body.tourist;
       const result = await Booking.create(booking);
-      res.send(result);
+      const bookingCount = await Booking.countDocuments({
+        tourist: touristId,
+      });
+      if (bookingCount === 3) {
+        const discount = await User.findByIdAndUpdate(
+          { _id: touristId },
+          { discount: true },
+          { new: true }
+        );
+        res.send({ result, discount });
+      } else {
+        res.send(result);
+      }
     } catch (error) {
       console.log(error);
     }

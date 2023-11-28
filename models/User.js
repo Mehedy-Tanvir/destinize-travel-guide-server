@@ -17,6 +17,10 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  discount: {
+    type: Boolean,
+    required: true,
+  },
   contactDetails: {
     phone: {
       type: String,
