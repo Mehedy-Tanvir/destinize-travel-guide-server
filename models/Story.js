@@ -1,10 +1,26 @@
 const { model, Schema } = require("mongoose");
 const StorySchema = new Schema({
-  storyDetails: {
+  title: {
     type: String,
     required: true,
   },
-  storyImage: {
+  author: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  image: {
     type: String,
     required: true,
   },

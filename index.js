@@ -142,10 +142,30 @@ const main = async () => {
   });
 
   //story related api
+  //   tourist route
   app.post("/stories", async (req, res) => {
     try {
       const story = req.body;
       const result = await Story.create(story);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   normal route
+  app.get("/stories", async (req, res) => {
+    try {
+      const result = await Story.find();
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   normal route
+  app.get("/stories/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const result = await Story.findById(id);
       res.send(result);
     } catch (error) {
       console.log(error);
