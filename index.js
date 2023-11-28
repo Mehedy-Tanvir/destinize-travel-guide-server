@@ -120,6 +120,17 @@ const main = async () => {
     }
   });
   //   normal route
+  app.get("/categoryTours", async (req, res) => {
+    try {
+      const category = req.query.category;
+      const result = await Tour.find({ tourType: category });
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   normal route
+  //   tourist route
   app.get("/tours/:id", async (req, res) => {
     try {
       const id = req.params.id;
