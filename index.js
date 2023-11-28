@@ -8,6 +8,7 @@ const User = require("./models/User");
 const Tour = require("./models/Tour");
 const Story = require("./models/Story");
 const Review = require("./models/Review");
+const Booking = require("./models/Booking");
 
 // middlewares
 app.use(express.json());
@@ -158,6 +159,17 @@ const main = async () => {
         "reviewerId",
         "name image"
       );
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   Booking related api
+  // tourist route
+  app.post("/bookings", async (req, res) => {
+    try {
+      const booking = req.body;
+      const result = await Booking.create(booking);
       res.send(result);
     } catch (error) {
       console.log(error);
