@@ -177,6 +177,18 @@ const main = async () => {
     }
   });
   //   tourist route
+  app.get("/bookings/:id", async (req, res) => {
+    try {
+      const touristId = req.params.id;
+      const result = await Booking.find({ tourist: touristId })
+        .populate("tourGuide")
+        .populate("tourPackage");
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   tourist route
   app.post("/wishlistItems", async (req, res) => {
     try {
       const wishlistItem = req.body;
