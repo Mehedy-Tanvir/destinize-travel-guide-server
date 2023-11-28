@@ -189,6 +189,28 @@ const main = async () => {
     }
   });
   //   tourist route
+  app.delete("/bookings/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const result = await Booking.findByIdAndDelete(id);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   tour guide route
+  app.get("/assignedTours/:id", async (req, res) => {
+    try {
+      const tourGuideId = req.params.id;
+      const result = await Booking.find({ tourGuide: tourGuideId })
+        .populate("tourist")
+        .populate("tourPackage");
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   tourist route
   app.post("/wishlistItems", async (req, res) => {
     try {
       const wishlistItem = req.body;

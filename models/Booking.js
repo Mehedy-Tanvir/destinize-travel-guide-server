@@ -19,6 +19,10 @@ const BookingSchema = new Schema({
     type: Date,
     required: true,
   },
+  status: {
+    type: String,
+    required: true,
+  },
 });
 
 const Booking = model("Booking", BookingSchema);
