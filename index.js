@@ -198,6 +198,28 @@ const main = async () => {
       console.log(error);
     }
   });
+  //   tourist route
+  app.get("/wishlistItems/:id", async (req, res) => {
+    try {
+      const touristId = req.params.id;
+      const result = await WishlistItem.find({ tourist: touristId }).populate(
+        "tourPackage"
+      );
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   tourist route
+  app.delete("/wishlistItems/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const result = await WishlistItem.findByIdAndDelete(id);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   app.get("/", async (req, res) => {
     res.send("Welcome to Destinize server");
