@@ -9,6 +9,7 @@ const Tour = require("./models/Tour");
 const Story = require("./models/Story");
 const Review = require("./models/Review");
 const Booking = require("./models/Booking");
+const WishlistItem = require("./models/WishlistItem");
 
 // middlewares
 app.use(express.json());
@@ -170,6 +171,16 @@ const main = async () => {
     try {
       const booking = req.body;
       const result = await Booking.create(booking);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   tourist route
+  app.post("/wishlistItems", async (req, res) => {
+    try {
+      const wishlistItem = req.body;
+      const result = await WishlistItem.create(wishlistItem);
       res.send(result);
     } catch (error) {
       console.log(error);
