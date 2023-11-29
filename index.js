@@ -5,6 +5,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 3000;
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const connectDB = require("./db/connectDB");
 const User = require("./models/User");
 const Tour = require("./models/Tour");
@@ -306,7 +307,7 @@ const main = async () => {
     }
   });
   //   tourist route
-  app.patch("/bookingDiscount/:id", async (req, res) => {
+  app.patch("/bookingDiscount/:id", verifyToken, async (req, res) => {
     try {
       const id = req.params.id;
       const { price, tourist } = req.body;
@@ -330,6 +331,18 @@ const main = async () => {
     try {
       const touristId = req.params.id;
       const result = await Booking.find({ tourist: touristId })
+        .populate("tourGuide")
+        .populate("tourPackage");
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   tourist route
+  app.get("/myBookings/:id", verifyToken, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const result = await Booking.findById(id)
         .populate("tourGuide")
         .populate("tourPackage");
       res.send(result);
@@ -384,6 +397,7 @@ const main = async () => {
       }
     }
   );
+
   //   tourist route
   app.post("/wishlistItems", verifyToken, async (req, res) => {
     try {
@@ -411,6 +425,38 @@ const main = async () => {
     try {
       const id = req.params.id;
       const result = await WishlistItem.findByIdAndDelete(id);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  //   payment related routes
+
+  // payment intent
+  app.post("/create-payment-intent", async (req, res) => {
+    const { price } = req.body;
+    const amount = parseInt(price * 100);
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: "usd",
+      payment_method_types: ["card"],
+    });
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  });
+
+  //   tourist route
+  app.patch("/bookingConfirm/:id", verifyToken, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { status } = req.body;
+      const result = await Booking.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+      );
       res.send(result);
     } catch (error) {
       console.log(error);
