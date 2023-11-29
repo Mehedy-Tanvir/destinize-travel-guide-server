@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 3000;
 const connectDB = require("./db/connectDB");
 const User = require("./models/User");
@@ -13,10 +15,93 @@ const WishlistItem = require("./models/WishlistItem");
 
 // middlewares
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  })
+);
+app.use(cookieParser());
+
+// my middlewares
+// verify admin
+const verifyAdmin = async (req, res, next) => {
+  const email = req.user.email;
+  const query = { email: email };
+  const user = await User.findOne(query);
+  const isAdmin = user?.role === "Admin";
+  if (!isAdmin) {
+    return res.status(403).send({ message: "forbidden access" });
+  }
+  next();
+};
+// verify tour guide
+const verifyTourGuide = async (req, res, next) => {
+  const email = req.user.email;
+  const query = { email: email };
+  const user = await User.findOne(query);
+  const isTourGuide = user?.role === "Tour Guide";
+  if (!isTourGuide) {
+    return res.status(403).send({ message: "forbidden access" });
+  }
+  next();
+};
+
+// auth middlewares
+const verifyToken = async (req, res, next) => {
+  const token = req?.cookies?.token;
+
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
 
 const main = async () => {
   await connectDB();
+
+  // auth related api
+  app.post("/jwt", async (req, res) => {
+    try {
+      const user = req.body;
+      const token = jwt.sign(
+        {
+          email: user.email,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "10h" }
+      );
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production" ? true : false,
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  app.post("/logout", async (req, res) => {
+    try {
+      res
+        .clearCookie("token", {
+          maxAge: 0,
+          secure: process.env.NODE_ENV === "production" ? true : false,
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   // user related apis
 
@@ -45,7 +130,7 @@ const main = async () => {
     }
   });
   //   tour guide route
-  app.put("/users/:id", async (req, res) => {
+  app.put("/users/:id", verifyToken, verifyTourGuide, async (req, res) => {
     try {
       const user = req.body;
       const id = req.params.id;
@@ -78,7 +163,7 @@ const main = async () => {
   });
 
   //   admin route
-  app.get("/allUsers", async (req, res) => {
+  app.get("/allUsers", verifyToken, verifyAdmin, async (req, res) => {
     try {
       const result = await User.find();
       res.send(result);
@@ -87,7 +172,7 @@ const main = async () => {
     }
   });
   //   admin route
-  app.patch("/roles/:id", async (req, res) => {
+  app.patch("/roles/:id", verifyToken, verifyAdmin, async (req, res) => {
     try {
       const id = req.params.id;
       const { role } = req.body;
@@ -101,7 +186,7 @@ const main = async () => {
 
   // tour package related api
   // admin route
-  app.post("/tours", async (req, res) => {
+  app.post("/tours", verifyToken, verifyAdmin, async (req, res) => {
     try {
       const tour = req.body;
       const result = await Tour.create(tour);
@@ -131,7 +216,7 @@ const main = async () => {
   });
   //   normal route
   //   tourist route
-  app.get("/tours/:id", async (req, res) => {
+  app.get("/tours/:id", verifyToken, async (req, res) => {
     try {
       const id = req.params.id;
       const result = await Tour.findById(id);
@@ -143,7 +228,7 @@ const main = async () => {
 
   //story related api
   //   tourist route
-  app.post("/stories", async (req, res) => {
+  app.post("/stories", verifyToken, async (req, res) => {
     try {
       const story = req.body;
       const result = await Story.create(story);
@@ -174,7 +259,7 @@ const main = async () => {
 
   //review related api
   // tourist route
-  app.post("/reviews", async (req, res) => {
+  app.post("/reviews", verifyToken, async (req, res) => {
     try {
       const review = req.body;
       const result = await Review.create(review);
@@ -198,7 +283,7 @@ const main = async () => {
   });
   //   Booking related api
   // tourist route
-  app.post("/bookings", async (req, res) => {
+  app.post("/bookings", verifyToken, async (req, res) => {
     try {
       const booking = req.body;
       const touristId = req.body.tourist;
@@ -221,7 +306,7 @@ const main = async () => {
     }
   });
   //   tourist route
-  app.get("/bookings/:id", async (req, res) => {
+  app.get("/bookings/:id", verifyToken, async (req, res) => {
     try {
       const touristId = req.params.id;
       const result = await Booking.find({ tourist: touristId })
@@ -233,7 +318,7 @@ const main = async () => {
     }
   });
   //   tourist route
-  app.delete("/bookings/:id", async (req, res) => {
+  app.delete("/bookings/:id", verifyToken, async (req, res) => {
     try {
       const id = req.params.id;
       const result = await Booking.findByIdAndDelete(id);
@@ -243,34 +328,44 @@ const main = async () => {
     }
   });
   //   tour guide route
-  app.get("/assignedTours/:id", async (req, res) => {
-    try {
-      const tourGuideId = req.params.id;
-      const result = await Booking.find({ tourGuide: tourGuideId })
-        .populate("tourist")
-        .populate("tourPackage");
-      res.send(result);
-    } catch (error) {
-      console.log(error);
+  app.get(
+    "/assignedTours/:id",
+    verifyToken,
+    verifyTourGuide,
+    async (req, res) => {
+      try {
+        const tourGuideId = req.params.id;
+        const result = await Booking.find({ tourGuide: tourGuideId })
+          .populate("tourist")
+          .populate("tourPackage");
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     }
-  });
+  );
   //   tour guide route
-  app.patch("/updateTourStatus/:id", async (req, res) => {
-    try {
-      const id = req.params.id;
-      const { status } = req.body;
-      const result = await Booking.findByIdAndUpdate(
-        id,
-        { status },
-        { new: true }
-      );
-      res.send(result);
-    } catch (error) {
-      console.log(error);
+  app.patch(
+    "/updateTourStatus/:id",
+    verifyToken,
+    verifyTourGuide,
+    async (req, res) => {
+      try {
+        const id = req.params.id;
+        const { status } = req.body;
+        const result = await Booking.findByIdAndUpdate(
+          id,
+          { status },
+          { new: true }
+        );
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+      }
     }
-  });
+  );
   //   tourist route
-  app.post("/wishlistItems", async (req, res) => {
+  app.post("/wishlistItems", verifyToken, async (req, res) => {
     try {
       const wishlistItem = req.body;
       const result = await WishlistItem.create(wishlistItem);
@@ -280,7 +375,7 @@ const main = async () => {
     }
   });
   //   tourist route
-  app.get("/wishlistItems/:id", async (req, res) => {
+  app.get("/wishlistItems/:id", verifyToken, async (req, res) => {
     try {
       const touristId = req.params.id;
       const result = await WishlistItem.find({ tourist: touristId }).populate(
@@ -292,7 +387,7 @@ const main = async () => {
     }
   });
   //   tourist route
-  app.delete("/wishlistItems/:id", async (req, res) => {
+  app.delete("/wishlistItems/:id", verifyToken, async (req, res) => {
     try {
       const id = req.params.id;
       const result = await WishlistItem.findByIdAndDelete(id);
