@@ -306,6 +306,26 @@ const main = async () => {
     }
   });
   //   tourist route
+  app.patch("/bookingDiscount/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { price, tourist } = req.body;
+      const discount = await Booking.findByIdAndUpdate(
+        id,
+        { discountedPrice: price },
+        { new: true }
+      );
+      const discountClose = await User.findByIdAndUpdate(
+        tourist,
+        { discount: false },
+        { new: true }
+      );
+      res.send({ message: "Discount Applied", discount, discountClose });
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  //   tourist route
   app.get("/bookings/:id", verifyToken, async (req, res) => {
     try {
       const touristId = req.params.id;

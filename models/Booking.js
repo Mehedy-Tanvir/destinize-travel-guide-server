@@ -23,6 +23,9 @@ const BookingSchema = new Schema({
     type: String,
     required: true,
   },
+  discountedPrice: {
+    type: Number,
+  },
 });
 
 const Booking = model("Booking", BookingSchema);
