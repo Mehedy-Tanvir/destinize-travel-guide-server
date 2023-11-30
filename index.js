@@ -19,7 +19,10 @@ const Payment = require("./models/Payment");
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "https://destinize-tour-guide.web.app",
+      "https://destinize-tour-guide.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
