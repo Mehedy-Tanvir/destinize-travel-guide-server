@@ -13,6 +13,7 @@ const Story = require("./models/Story");
 const Review = require("./models/Review");
 const Booking = require("./models/Booking");
 const WishlistItem = require("./models/WishlistItem");
+const Payment = require("./models/Payment");
 
 // middlewares
 app.use(express.json());
@@ -434,7 +435,7 @@ const main = async () => {
   //   payment related routes
 
   // payment intent
-  app.post("/create-payment-intent", async (req, res) => {
+  app.post("/create-payment-intent", verifyToken, async (req, res) => {
     const { price } = req.body;
     const amount = parseInt(price * 100);
     const paymentIntent = await stripe.paymentIntents.create({
@@ -445,6 +446,15 @@ const main = async () => {
     res.send({
       clientSecret: paymentIntent.client_secret,
     });
+  });
+  app.post("/payment", async (req, res) => {
+    try {
+      const payment = req.body;
+      const result = await Payment.create(payment);
+      res.send(result);
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   //   tourist route
