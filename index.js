@@ -116,11 +116,21 @@ const main = async () => {
   app.post("/sendEmail", async (req, res) => {
     try {
       const emailDetails = req.body;
+      const userTemplate = `
+      <p>Dear Mehedy Tanvir,</p>
+      <p>You have received a new message from a user:</p>
+      <p><strong>Name:</strong> ${emailDetails.name}</p>
+      <p><strong>Email:</strong> ${emailDetails.email}</p>
+      <p><strong>Message:</strong></p>
+      <p>${emailDetails.message}</p>
+      <p>Please respond to the user's inquiry promptly.</p>
+    `;
+
       await resend.emails.send({
         from: "onboarding@resend.dev",
-        to: "mehedytanvir451@gmail.com",
-        subject: `Message sent by ${emailDetails.email} from Destinize.`,
-        html: `<p>${emailDetails.message}</p>`,
+        to: "mehedytanvir451@gmail.com", // Replace with your email address
+        subject: `New Message from ${emailDetails.name}`,
+        html: userTemplate,
       });
 
       res.status(200).json({ message: "Email sent successfully" });
