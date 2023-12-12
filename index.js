@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const { Resend } = require("resend");
 const cors = require("cors");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
@@ -14,6 +15,9 @@ const Review = require("./models/Review");
 const Booking = require("./models/Booking");
 const WishlistItem = require("./models/WishlistItem");
 const Payment = require("./models/Payment");
+
+// Resend
+const resend = new Resend(`${process.env.RESEND_API}`);
 
 // middlewares
 app.use(express.json());
@@ -105,6 +109,24 @@ const main = async () => {
         .send({ success: true });
     } catch (error) {
       console.log(error);
+    }
+  });
+
+  // send email
+  app.post("/sendEmail", async (req, res) => {
+    try {
+      const emailDetails = req.body;
+      await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: "mehedytanvir451@gmail.com",
+        subject: `Message sent by ${emailDetails.email} from Destinize.`,
+        html: `<p>${emailDetails.message}</p>`,
+      });
+
+      res.status(200).json({ message: "Email sent successfully" });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   });
 
