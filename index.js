@@ -26,6 +26,7 @@ app.use(
     origin: [
       "https://destinize-tour-guide.web.app",
       "https://destinize-tour-guide.firebaseapp.com",
+      "https://iridescent-croissant-12ff82.netlify.app",
     ],
     credentials: true,
   })
